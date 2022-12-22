@@ -1,0 +1,22 @@
+Schools
+	Name
+	Passcode
+	
+Student(linked to School)
+	Name
+	Report_cards(Report Cards)
+	Pay code
+
+Assessment(linked to School)
+	Name
+	Extra information
+	Class
+	Extra papers
+	Report Cards(Report Cards)
+	Date
+
+Report Card (linked to Assessment and Student)
+	File
+
+
+	

@@ -16,6 +16,7 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { Card } from 'antd';
+import  Add_assessment  from './Add_assessment';
 const { Meta } = Card;
 
 export const Class_assessment = (props) => {
@@ -126,11 +127,14 @@ export const Class_assessment = (props) => {
             items : [
                 {
                     label : 'Import Excel File',
-                    icon : 'pi pi-fw pi-file'
+                    icon : 'pi pi-fw pi-file',
+                    command : ()=> props.Add_assessment_switch()
                 } ,
                 {
                     label : 'Import Csv File',
-                    icon : 'pi pi-fw pi-file'
+                    icon : 'pi pi-fw pi-file',
+                    command : ()=> props.Add_assessment_switch()
+
                 }
             ]
         } , {
@@ -220,7 +224,7 @@ export const Class_assessment = (props) => {
 
 
     useEffect(()=>{
-        console.log(props)
+        // console.log(props)
 
     },[])
     return (
@@ -298,18 +302,26 @@ export const Class_assessment = (props) => {
             </div>
 
             </div>
+            {
+                props.store.backend.Add_assessment_switch ? (
+                    <Add_assessment/>
+                ) : (
+                    null
+                )
+
+            }
                
             
         </div>
     )
 }
 
-const mapStateToProps = (state) => ({
-    
-})
-
-const mapDispatchToProps = {
-    
+const mapStateToProps = (state) => {
+    return {store : state}
 }
+
+const mapDispatchToProps = (dispatch) => ({
+    Add_assessment_switch : ()=>dispatch({type : 'Add_assessment'})
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(Class_assessment)
