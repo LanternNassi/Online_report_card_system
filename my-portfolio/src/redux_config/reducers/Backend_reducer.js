@@ -1,8 +1,8 @@
 let backend_reducer = (state = {
     //Switches for overlays
+    Authenticated : false,
     Add_assessment_switch : false,
     Add_teacher_switch : false,
-
     add_name : '',
     Classes : true
 } , action) => {
@@ -22,6 +22,17 @@ let backend_reducer = (state = {
         case 'add_name' : 
             return {
                 ...state , add_name : action.text
+            }
+        case 'Authenticate' : 
+            return {
+                ...state , Authenticated : state.Authenticated ? false : true ,
+            }
+        case 'Auth_info' : 
+            return {
+                ...state , 
+                id : action.id,
+                School : action.School,
+                Passcode : action.Passcode,
             }
         default :
             return state

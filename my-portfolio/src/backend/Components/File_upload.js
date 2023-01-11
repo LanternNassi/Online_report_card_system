@@ -6,16 +6,25 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Button } from 'primereact/button';
 import { Tooltip } from 'primereact/tooltip';
 import { Tag } from 'primereact/tag';
+import axios from 'axios'
 import { connect } from 'react-redux'
+import FormData, {getHeaders} from 'form-data';
 
 
 export const File_upload = (props) => {
     const [totalSize, setTotalSize] = useState(0);
+    const [uploaded_size , setuploaded_size] = useState(null)
     const toast = useRef(null);
     const fileUploadRef = useRef(null);
 
     const onUpload = () => {
-        toast.current.show({severity: 'info', summary: 'Success', detail: 'File Uploaded'});
+        // alert('Uploaded')
+        toast.current.show({severity: 'info', summary: 'Uploading', sticky : uploaded_size ===1 ? (false) : (true), detail: ()=>(
+            // <div style = {{height : '40vh' , width : '20vw'}} >
+            // <ProgressBar value = {uploaded_size} />
+            // </div>
+            <h3>Hello</h3>
+        )});
     }
 
     const onTemplateSelect = (e) => {
@@ -32,10 +41,11 @@ export const File_upload = (props) => {
 
     const onTemplateUpload = (e) => {
         let _totalSize = 0;
-        e.files.forEach(file => {
-            _totalSize += (file.size || 0);
-        });
-
+        // e.files.forEach(file => {
+        // });
+        for(let i = 0; i<e.files.length; i++){
+            _totalSize += (e.files[i].size || 0);
+        }
         setTotalSize(_totalSize);
         toast.current.show({severity: 'info', summary: 'Success', detail: 'File Uploaded'});
     }
@@ -71,6 +81,27 @@ export const File_upload = (props) => {
                 <ProgressBar value={value} displayValueTemplate={() => `${formatedValue} / 1 GB`} style={{width: '300px', height: '20px', marginLeft: 'auto'}}></ProgressBar>
             </div>
         );
+    }
+
+    const upload = (form_data) => {
+        axios({
+            method : 'POST',
+            url : 'http://localhost:8000/Upload_reports',
+            onUploadProgress : (e) => {
+                setuploaded_size(e.progress)
+            },
+            data : form_data,
+            headers : { 
+                'content-type' : 'multipart/form-data',                
+            }
+        }).then((response)=>{
+            if (response.status == 200){
+                onTemplateClear()
+                fileUploadRef.current.clear()
+                // console.log(fileUploadRef)
+                toast.current.show({severity: 'Status', summary: 'Success', detail: 'Reports successfully uploaded'});
+            }
+        })
     }
 
     const itemTemplate = (file, props) => {
@@ -110,8 +141,17 @@ export const File_upload = (props) => {
         }
     }
 
+    const progressBarTemplate = (e) => {
+        return (
+            <div>
+                <ProgressBar className = "p-progressbar-value" value = {uploaded_size*100}/>
+            </div>
+        )
+    }
+
     const chooseOptions = {icon: 'pi pi-fw pi-images', iconOnly: true, className: 'custom-choose-btn p-button-rounded p-button-outlined'};
-    const uploadOptions = {icon: 'pi pi-fw pi-cloud-upload', iconOnly: true, className: 'custom-upload-btn p-button-success p-button-rounded p-button-outlined'};
+    const uploadOptions = {icon: 'pi pi-fw pi-cloud-upload',
+     iconOnly: true, className: 'custom-upload-btn p-button-success p-button-rounded p-button-outlined'};
     const cancelOptions = {icon: 'pi pi-fw pi-times', iconOnly: true, className: 'custom-cancel-btn p-button-danger p-button-rounded p-button-outlined'};
 
     return (
@@ -124,10 +164,25 @@ export const File_upload = (props) => {
 
             <div className="card">
               
-                <FileUpload ref={fileUploadRef} style = {{width : '50vw'}} name="demo[]" url={''} multiple accept="pdf/*" maxFileSize={1000000000}
-                    onUpload={onTemplateUpload} onSelect={onTemplateSelect} onError={onTemplateClear} onClear={onTemplateClear}
+                <FileUpload ref={fileUploadRef} customUpload = {true} style = {{width : '50vw'}} name="demo[]" url={'http://localhost:8000/Upload_reports'} multiple accept="pdf/*" maxFileSize={1000000000}
+                    onUpload={onUpload} progressBarTemplate = {progressBarTemplate} onSelect={onTemplateSelect} onError={onTemplateClear} onClear={onTemplateClear}
+                    uploadHandler = { ({files})=>{
+                        const form_data = new FormData()
+                        for(let i = 0; i<files.length; i++){
+                            let name_list = (files[i].name).split('')
+                            let computed_name = (name_list.slice(0,(name_list.length-10)).join('')).replace('-',' ')
+                            let computed_passcode = (name_list.slice(name_list.length-9 , name_list.length-4)).join('')
+                            // console.log(computed_name.replace('-',' '))
+                            // compiled.push()
+                            form_data.append(computed_name , files[i])
+                            // form_data.append(computed_name ,{Name : computed_name , Passcode : computed_passcode , File : files[i] })
+                        }
+                       
+                        upload(form_data)
+                        // console.log(files[0].name)
+                    }}
                     headerTemplate={headerTemplate} itemTemplate={itemTemplate} emptyTemplate={emptyTemplate}
-                    chooseOptions={chooseOptions} uploadOptions={uploadOptions} cancelOptions={cancelOptions} />
+                    chooseOptions={chooseOptions} uploadOptions = {uploadOptions} cancelOptions={cancelOptions} />
 
                
             </div>

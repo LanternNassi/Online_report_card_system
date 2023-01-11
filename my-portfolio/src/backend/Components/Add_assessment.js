@@ -11,6 +11,7 @@ import { Button } from 'primereact/button';
 import { Steps } from 'primereact/steps';
 import  File_upload from './File_upload.js'
 import { InputTextarea } from 'primereact/inputtextarea';
+import FormData, {getHeaders} from 'form-data';
 import { InputText } from 'primereact/inputtext'
 import {Input , Card} from 'antd'
 import { ScrollPanel } from 'primereact/scrollpanel';
@@ -53,6 +54,7 @@ export const Add_assessment = (props) => {
         {label : 'Extras '}
     ]
 
+
     const renderFooter = (name) => {
         return (
             <div>
@@ -71,6 +73,13 @@ export const Add_assessment = (props) => {
                         onHide(name)
 
                     } else {
+                        if (activeIndex === 0){
+                            setName(document.getElementById('Name_input').value)
+                        } else if(activeIndex === 1){
+                            setExtra_info(document.getElementById('Extra_info').value)
+                        } else if (activeIndex === 2){
+
+                        }
                         setactiveIndex(activeIndex + 1)
                     }
                 }} autoFocus />

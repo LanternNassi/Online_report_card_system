@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-#_vo#9zcs4&!2)ouy*ee*d-afve*o31i2=i9m!x*-vw@r)y-y%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -40,7 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders'
 ]
+
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:3000',
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -50,8 +55,20 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+REST_FRAMEWORK = {
+# Use Django's standard `django.contrib.auth` permissions,
+# or allow read-only access for unauthenticated users.
+#'DEFAULT_PERMISSION_CLASSES': [
+ #   'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+#] ,
+#'DEFAULT_AUTHENTICATION_CLASSES': [
+ #       'rest_framework.authentication.BasicAuthentication',
+  #      'rest_framework.authentication.SessionAuthentication',
+   # ]
 
+}
 ROOT_URLCONF = 'online_report_generation_system.urls'
 
 TEMPLATES = [

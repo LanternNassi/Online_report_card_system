@@ -28,7 +28,7 @@ function App(props) {
     <Router>
       <Route exact path = "/" component = {Frontend_index}/>
       {/* <Route exact path = "/Sign_up" component = {Sign_up}/> */}
-      <Route exact path = "/SHACK" component = {Backend_index}/>
+      <Route exact path = "/School/:School" component = {Backend_index}/>
       <Route exact path = "/SHACK/:Class" component = {Class_assessment}/>
     </Router>
   )

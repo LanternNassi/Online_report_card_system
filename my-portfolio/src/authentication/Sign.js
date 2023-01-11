@@ -12,6 +12,8 @@ import { InputText } from 'primereact/inputtext'
 import {Input , Card} from 'antd'
 import './Styles/Sign.css'
 import { ScrollPanel } from 'primereact/scrollpanel';
+import axios from "axios"
+import {Link} from 'react-router-dom'
 import { AutoComplete } from 'primereact/autocomplete';
 
 
@@ -65,6 +67,42 @@ export const Sign = (props) => {
             setfiltered_papers(_filtered_papers);
         }, 250);
     }
+    const upload = (info) => {
+        axios({
+            url : 'http://127.0.0.1:8000/create-user',
+            method : 'POST',
+            data : {...info},
+            headers : { 
+                'content-type' : 'application/json',
+            }
+        }).then((e)=>{
+            if (e.status === 201){
+                alert('Signed up')
+                props.Fill_info(e.data['id'] , Name , document.getElementById('Passcode').value )
+                props.Authenticate()
+            }
+        }).catch((exceptio)=>{})
+    }
+    const Sign_in = () => {
+        axios({
+            method : 'POST',
+            url : 'http://127.0.0.1:8000/Sign_in/',
+            data : {Passcode : document.getElementById('Passcode').value},
+            // data : {}
+
+        }).then((e)=>{
+            if (e.status === 200){
+                console.log(e.data['Name'])
+                props.Fill_info(e.data['id'] , e.data['Name'] , e.data['Passcode'] )
+                setName(e.data['Name'])
+                setPasscode(e.data['Passcode'])
+                setEmail(e.data['Email'])
+                props.Authenticate()
+            } else {
+                alert(e.status)
+            }
+        })
+    }
     const itemTemplate = (item) => {
         return (
             <div className="paper-item">
@@ -101,11 +139,20 @@ export const Sign = (props) => {
                    
                 } } className="p-button-text" />
                 <Button label={activeIndex === 2 || Signin === true ? ('Submit') : ('Next')} icon="pi pi-check" onClick={() => {
+                    alert('Signing in')
                     if (activeIndex === 2 || Signin === true){
+                        if (Signin === true) {
+                            Sign_in()
+                        }
                         // setPasscode(document.getElementById('Passcode').value)
-                        console.log(document.getElementById('Passcode').value)
-                        props.Sign_alert_switch()
-                        onHide(name)
+                        // console.log()
+                       
+
+                        if(Signin === false){
+                            upload({'Name' : Name , 'Email' : Email , 'Passcode' : document.getElementById('Passcode').value})
+
+                        } 
+                        
 
                     } else {
                       
@@ -140,37 +187,21 @@ export const Sign = (props) => {
         )
     }
 
-    const Extra_Comp_field = () => {
+    const Proceed_to_dashboard = () => {
         return (
-            <InputTextarea placeholder = "Put here your extra info about the assessment" style = {{width : '30vw'}} id = "Extra_info" rows={5} cols={30} autoResize = {false} />
+            <div className = "Dashboard_button" >
+                <h3>Proceed to dashboard</h3>
+                <Link to = {"/School/" + Name } style = {{color : 'transparent'}} >
+                    <Button label = "Proceed" onClick = {()=>{
+                         props.Sign_alert_switch()
+                        //  onHide(name)
+                    }} className = "p-button-rounded p-button-success" />
+                </Link>
+            </div>
         )
-
     }
 
-    const Field_identifier = (id_prop) =>{
-        switch(id_prop){
-            case 'Name' :
-                if (Name){
-                    return Name
-                } else {
-                    return ''
-                }
-            case 'Email' :
-                if (Email){
-                    return Email
-                } else {
-                    return ''
-                }
-            case 'Passcode' :
-                if (Passcode){
-                    return Passcode
-                } else {
-                    return ''
-                }
-            default :
-                return ''
-            }
-    }
+   
 
     
 
@@ -229,12 +260,17 @@ export const Sign = (props) => {
                         ) : (null)
                     }
                     {
-                        Signin === true ? (
+                        Signin === true && !props.store.backend.Authenticated ? (
                             <div className = "form-field-Name">
                             <h4>Passcode</h4>
                             <Name_Comp_field id_prop = {'Passcode'} />
     
                         </div>
+                        ) : (null)
+                    }
+                    {
+                        props.store.backend.Authenticated ? (
+                            <Proceed_to_dashboard/>
                         ) : (null)
                     }
                 </div>
@@ -250,7 +286,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
     Sign_alert_switch : ()=> dispatch({type : 'Sign_alert'}),
-    Add_name : (text)=> dispatch({type : 'add_name' , text : text})
+    Add_name : (text)=> dispatch({type : 'add_name' , text : text}),
+    Authenticate : () => dispatch({type : 'Authenticate'}),
+    Fill_info : (id , School , Passcode) => dispatch({type : 'Auth_info' , School : School , Passcode : Passcode , id : id})
 })
 
 
