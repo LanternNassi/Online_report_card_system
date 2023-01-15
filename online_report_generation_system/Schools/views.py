@@ -14,7 +14,9 @@ from django.utils import timezone
 
 from .models import (
     School,
-    Assessment
+    Assessment,
+    Report_Card,
+    Extra_file,
 )
 
 from .Serializers import (
@@ -51,24 +53,64 @@ def sign_in(request):
 @api_view(['POST'])
 @permission_classes([])
 def create_assessment(request):
+    print(request.data)
     serialized_new_assessment = Assessment_serializer(data = {**request.data})
     if (serialized_new_assessment.is_valid()):
         new_assessment = serialized_new_assessment.create(serialized_new_assessment.validated_data)
         return Response(data = Assessment_serializer(new_assessment).data , status = status.HTTP_201_CREATED)
     else :
+        print(serialized_new_assessment._errors)
         return Response(data = serialized_new_assessment.error_messages , status = status.HTTP_205_RESET_CONTENT )
 
 @api_view(['POST'])
 @permission_classes([])
 def update_assessment(request):
     reports = request.FILES
-    print(reports)
+    Assessment_id = request.data['id']
+    active_assessment = Assessment.objects.get(id = Assessment_id)
     # print(reports['demo[]'])
     for i in reports:
-        print(i)
+        Card = Report_Card(File = i)
+        Card.save()
+        active_assessment.Report_cards.add(Card)
     return Response(data = {'success' : 'true'} , status = status.HTTP_200_OK)
 
 
 
 
+@api_view(['POST'])
+@permission_classes([])
+def update_assessment_extra_files(request):
+    reports = request.FILES
+    Assessment_id = request.data['id']
+    active_assessment = Assessment.objects.get(id = Assessment_id)
+    for i in reports:
+        Extra = Extra_file(File = i)
+        Extra.save()
+        active_assessment.Extra_files.add(Extra)
+    return Response(data = {'success' : 'true'} , status = status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([])
+def get_assessments_specific_class(request, school_id , Class):
+    assessments = Assessment.objects.filter(School = school_id , Class = Class)
+    organised_structure = {}
+    for assessment in assessments:
+        gotten_year = assessment.Added_date.year
+        if ( gotten_year in organised_structure):
+            organised_structure[gotten_year].append({
+                'name' : assessment.Name,
+                'extra_information' : assessment.Extra_information,
+                'Added_date' : assessment.Added_date
+            })
+        else :
+            organised_structure[gotten_year] = []
+            organised_structure[gotten_year].append({
+                'name' : assessment.Name,
+                'extra_information' : assessment.Extra_information,
+                'Added_date' : assessment.Added_date
+            })
+            
+    return Response(data = organised_structure , status = status.HTTP_200_OK)
 

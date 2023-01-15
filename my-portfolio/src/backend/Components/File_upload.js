@@ -104,6 +104,26 @@ export const File_upload = (props) => {
         })
     }
 
+    const upload_other_docs = (form_data) => {
+        axios({
+            method : 'POST',
+            url : 'http://localhost:8000/Upload_extra_docs',
+            onUploadProgress : (e) => {
+                setuploaded_size(e.progress)
+            },
+            data : form_data,
+            headers : { 
+                'content-type' : 'multipart/form-data',                
+            }
+
+        }).then((response)=>{
+            if(response.status == 200){
+                toast.current.show({severity: 'Status', summary: 'Success', detail: 'Extra files uploaded successfully'});
+
+            }
+        })
+    }
+
     const itemTemplate = (file, props) => {
         return (
             <div className="flex align-items-center flex-wrap">
@@ -167,18 +187,29 @@ export const File_upload = (props) => {
                 <FileUpload ref={fileUploadRef} customUpload = {true} style = {{width : '50vw'}} name="demo[]" url={'http://localhost:8000/Upload_reports'} multiple accept="pdf/*" maxFileSize={1000000000}
                     onUpload={onUpload} progressBarTemplate = {progressBarTemplate} onSelect={onTemplateSelect} onError={onTemplateClear} onClear={onTemplateClear}
                     uploadHandler = { ({files})=>{
-                        const form_data = new FormData()
-                        for(let i = 0; i<files.length; i++){
-                            let name_list = (files[i].name).split('')
-                            let computed_name = (name_list.slice(0,(name_list.length-10)).join('')).replace('-',' ')
-                            let computed_passcode = (name_list.slice(name_list.length-9 , name_list.length-4)).join('')
-                            // console.log(computed_name.replace('-',' '))
-                            // compiled.push()
-                            form_data.append(computed_name , files[i])
-                            // form_data.append(computed_name ,{Name : computed_name , Passcode : computed_passcode , File : files[i] })
+                        if(props.type){
+                            const form_data = new FormData()
+                            for(let i =0; i<files.length; i++){
+                                form_data.append('doc '+i , files[i])
+                            }
+                            form_data.append('id' , props.id)
+                            upload_other_docs(form_data)
+                        } else {
+                            const form_data = new FormData()
+                            for(let i = 0; i<files.length; i++){
+                                let name_list = (files[i].name).split('')
+                                let computed_name = (name_list.slice(0,(name_list.length-10)).join('')).replace('-',' ')
+                                let computed_passcode = (name_list.slice(name_list.length-9 , name_list.length-4)).join('')
+                                // console.log(computed_name.replace('-',' '))
+                                // compiled.push()
+                                form_data.append(computed_name , files[i])
+                                // form_data.append(computed_name ,{Name : computed_name , Passcode : computed_passcode , File : files[i] })
+                            }
+                            form_data.append('id' , props.id)
+                           
+                            upload(form_data)
                         }
-                       
-                        upload(form_data)
+                      
                         // console.log(files[0].name)
                     }}
                     headerTemplate={headerTemplate} itemTemplate={itemTemplate} emptyTemplate={emptyTemplate}

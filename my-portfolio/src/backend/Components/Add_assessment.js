@@ -15,6 +15,7 @@ import FormData, {getHeaders} from 'form-data';
 import { InputText } from 'primereact/inputtext'
 import {Input , Card} from 'antd'
 import { ScrollPanel } from 'primereact/scrollpanel';
+import axios from 'axios';
 
 const { Meta } = Card;
 
@@ -33,8 +34,14 @@ export const Add_assessment = (props) => {
     const [Name , setName] = useState('')
     const [Extra_info , setExtra_info] = useState('')
     const [ReportCards , setReportCards] = useState(null)
+    const [new_assessment_id , setnew_assessment_id] = useState(null)
     const [Extras , setExtras] = useState(null)
 
+    //Fields created
+    const [relevant_info , set_relevant_info] = useState(false)
+    const [reports_uploaded , setreports_uploaded] = useState(false)
+    const [extra_uploaded , setextra_uploaded] = useState(false)
+ 
     const dialogFuncMap = {
         'displayBasic': setDisplayBasic,
         'displayBasic2': setDisplayBasic2,
@@ -53,30 +60,71 @@ export const Add_assessment = (props) => {
         {label : 'Report cards'},
         {label : 'Extras '}
     ]
+    const upload_assessment = (extra_info) =>{
+        console.log(props.store)
+        // console.log({
+        //     'School' : props.store.backend.id,
+        //     'Name' : Name,
+        //     'Extra_information' : Extra_info,
+        //     'Class' : props.Class,
+        // })
+        axios({
+            method : 'POST',
+            url : 'http://localhost:8000/Create_assessment',
+            // onUploadProgress : (e) => {
+            //     setuploaded_size(e.progress)
+            // },
+            data : {
+                'School' : props.store.backend.id,
+                'Name' : Name,
+                'Extra_information' : extra_info,
+                'Class' : props.Class,
+            },
+            headers : { 
+                'content-type' : 'application/json',                
+            }
+        }).then((response)=>{
+            console.log(response.data)
+            setnew_assessment_id(response.data['id'])
+            set_relevant_info(true)
+            toast.current.show({severity: 'info', summary: 'Uploading' , detail : 'Assessment with id ' + response.data['id'] + 'created'})
 
+        })
+    }
 
-    const renderFooter = (name) => {
+    const renderFooter = () => {
         return (
             <div>
-                <Button label={activeIndex === 0 ? ('Cancel') : ('Previous')} icon="pi pi-times" onClick={() =>{
-                    if (activeIndex ===0){
-                        props.Add_assessment_switch() ; 
-                        onHide(name)
-                    } else {
-                        setactiveIndex(activeIndex-1)
-                    }
-                   
-                } } className="p-button-text" />
-                <Button label={activeIndex === 3 ? ('Submit') : ('Next')} icon="pi pi-check" onClick={() => {
+                {(activeIndex === 2 || activeIndex ===3) ? (null) : (
+                      <Button label={activeIndex === 0 ? ('Cancel') : ('Previous')} icon="pi pi-times" onClick={() =>{
+                        if (activeIndex ===0){
+                            props.Add_assessment_switch() ; 
+                            onHide('displayBasic2')
+                        } else {
+                            setactiveIndex(activeIndex-1)
+                        
+                        }
+                       
+                    } } className="p-button-text" />
+                )}
+              
+                <Button  label={activeIndex === 3 ? ('Submit') : ('Next')} icon="pi pi-check" onClick={() => {
                     if (activeIndex === 3){
                         props.Add_assessment_switch()
-                        onHide(name)
+                        onHide('displayBasic2')
 
                     } else {
                         if (activeIndex === 0){
                             setName(document.getElementById('Name_input').value)
                         } else if(activeIndex === 1){
-                            setExtra_info(document.getElementById('Extra_info').value)
+                            // setExtra_info(document.getElementById('Extra_info').value)
+                            // console.log(Extra_info)
+                            let info = document.getElementById('Extra_info').value
+                            console.log(info)
+                            setTimeout(() => {
+                                upload_assessment(info)
+                            }, 1000);
+                            
                         } else if (activeIndex === 2){
 
                         }
@@ -111,7 +159,9 @@ export const Add_assessment = (props) => {
     return (
         <div  ref = {ref} >
             <Toast ref={toast} />
-            <Dialog focusOnShow = {true} header="Add Assessment" visible={displayBasic2} style={{ width: '60vw' , height : '80vh' }} footer={renderFooter('displayBasic2')} onHide={() => onHide('displayBasic2')}>
+            <Dialog focusOnShow = {true} header="Add Assessment" visible={displayBasic2} style={{ width: '60vw' , height : '80vh' }} footer={
+               renderFooter()
+            } onHide={() => onHide('displayBasic2')}>
                 <div className = "components">
                     <Steps activeIndex = {activeIndex} model = {steps} style = {{
                         width : '40vw',
@@ -145,7 +195,7 @@ export const Add_assessment = (props) => {
                                     width : '50vw'
                             
                                 }}>
-                                    <File_upload type = {false}/>
+                                    <File_upload type = {false} id = {new_assessment_id}/>
                                 </ScrollPanel>
                             </div>
                       
@@ -160,7 +210,7 @@ export const Add_assessment = (props) => {
                                 width : '50vw'
                         
                             }}>
-                                <File_upload type = {true}/>
+                                <File_upload type = {true} id = {new_assessment_id}/>
                             </ScrollPanel>
                         </div>) : (null)
                     }

@@ -15,64 +15,14 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { ScrollPanel } from 'primereact/scrollpanel';
+import axios from 'axios'
 import { Card } from 'antd';
 import  Add_assessment  from './Add_assessment';
 const { Meta } = Card;
 
 export const Class_assessment = (props) => {
-    const [assessment , setassessment] = useState({
-        '2022' : [
-            {
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa'
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            }
-        ] , 
-        '2021' : [
-            {
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            },{
-                name : 'Mid Term 1',
-                file : 'Mid Term 1.xlsx',
-                extra_information : 'Plaaa Plaa',
-
-            }
-        ],
-       
-       
-    })
+    const [assessment , setassessment] = useState()  
+    
     const [card_styles , setcard_styles] = useState({
         width: '20vw',
          marginBottom: '2em' , 
@@ -221,10 +171,30 @@ export const Class_assessment = (props) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(rowData.price);
     }
 
+    const fetch_assessments = (id , Class) => {
+        axios({
+            method : 'GET',
+            url : 'http://localhost:8000/Assessment/' + id + '/' + Class + '/',
+            // onUploadProgress : (e) => {
+            //     setuploaded_size(e.progress)
+            // },
+            data : {
+                
+            },
+            headers : { 
+                'content-type' : 'application/json',                
+            }
+        }).then((response)=>{
+            console.log(response.data)
+            setassessment(response.data)
+            // setassessment({...response.data , assessment})
+        })
 
+    }
 
     useEffect(()=>{
         // console.log(props)
+        fetch_assessments(props.store.backend.id , props.match.params.Class)
 
     },[])
     return (
@@ -240,7 +210,7 @@ export const Class_assessment = (props) => {
             </div>
             <div className = "tab-view" >
                 <TabView activeIndex={activeIndex2} onTabChange={(e) => setActiveIndex2(e.index)} scrollable>
-                    {(Object.keys(assessment)).map((tab) => {
+                    {(Object.keys(assessment?(assessment):({}))).map((tab) => {
                         return (
                             <TabPanel header={tab} title = {tab}>
                                 <ScrollPanel style = {{
@@ -304,7 +274,7 @@ export const Class_assessment = (props) => {
             </div>
             {
                 props.store.backend.Add_assessment_switch ? (
-                    <Add_assessment/>
+                    <Add_assessment Class = {props.match.params.Class}/>
                 ) : (
                     null
                 )

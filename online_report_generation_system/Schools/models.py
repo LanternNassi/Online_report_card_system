@@ -25,6 +25,7 @@ class Assessment(models.Model):
     Name = models.CharField(max_length = 300)
     Extra_information = models.CharField(max_length=300)
     Class = models.CharField(max_length=300)
+    Added_date= models.DateTimeField(auto_now_add = True)
     Report_cards = models.ManyToManyField(Report_Card)
     Extra_files = models.ManyToManyField(Extra_file)
 

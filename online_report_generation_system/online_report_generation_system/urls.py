@@ -23,5 +23,7 @@ urlpatterns = [
     path('Sign_in/' , sign_in , name = 'Sign in'),
     path('Create_assessment' , create_assessment , name='Create assessment'),
     path('Upload_reports' , update_assessment , name = 'upload reports'),
+    path('Upload_extra_docs' , update_assessment_extra_files , name = 'Upload extra info'),
+    path('Assessment/<int:school_id>/<str:Class>/', get_assessments_specific_class , name = 'Assessment Specific')
     
 ]
